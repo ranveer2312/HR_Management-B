@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/stationary/inventory")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class StationaryInventoryTransactionController {
     private final StationaryInventoryTransactionService service;
 
@@ -34,7 +34,8 @@ public class StationaryInventoryTransactionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StationaryInventoryTransaction> update(@PathVariable Long id, @RequestBody StationaryInventoryTransaction transaction) {
+    public ResponseEntity<StationaryInventoryTransaction> update(@PathVariable Long id,
+            @RequestBody StationaryInventoryTransaction transaction) {
         return service.findById(id)
                 .map(existingTransaction -> {
                     return ResponseEntity.ok(service.save(transaction));
@@ -51,4 +52,4 @@ public class StationaryInventoryTransactionController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

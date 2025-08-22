@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/electric-bills")
-@CrossOrigin(origins = "https://idmstiranga.online", allowCredentials = "true")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app", allowCredentials = "true")
 public class ElectricBillsController {
 
     @Autowired

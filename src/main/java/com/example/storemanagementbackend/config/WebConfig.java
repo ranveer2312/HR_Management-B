@@ -20,10 +20,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                    "https://idmstiranga.online",
-                    "http://idmstiranga.online", 
-                    "http://localhost:3000"
-                )
+                        "https://idmstiranga.online",
+                        "https://hr-management-f.vercel.app",
+                        "http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
                 .allowedHeaders("*")
                 .allowCredentials(true)

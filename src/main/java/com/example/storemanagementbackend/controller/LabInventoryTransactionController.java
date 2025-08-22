@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/lab/inventory")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class LabInventoryTransactionController {
     @Autowired
     private LabInventoryTransactionService service;
@@ -32,7 +32,8 @@ public class LabInventoryTransactionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LabInventoryTransaction> update(@PathVariable Long id, @RequestBody LabInventoryTransaction transaction) {
+    public ResponseEntity<LabInventoryTransaction> update(@PathVariable Long id,
+            @RequestBody LabInventoryTransaction transaction) {
         return service.findById(id)
                 .map(existingTransaction -> {
                     transaction.setId(id);
@@ -50,4 +51,4 @@ public class LabInventoryTransactionController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

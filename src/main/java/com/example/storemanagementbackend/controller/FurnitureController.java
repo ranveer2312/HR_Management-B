@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/assets/furniture")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class FurnitureController {
     @Autowired
     private FurnitureService service;
@@ -50,4 +50,4 @@ public class FurnitureController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

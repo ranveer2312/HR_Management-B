@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/attendance")
-@CrossOrigin(origins = { "https://idmstiranga.online", "http://idmstiranga.online",
+@CrossOrigin(origins = { "https://hr-management-f.vercel.app", "http://idmstiranga.online",
         "http://localhost:3000" }, allowCredentials = "true", allowedHeaders = "*")
 public class AttendanceController {
 

@@ -1,5 +1,5 @@
 package com.example.storemanagementbackend.controller;
- 
+
 import com.example.storemanagementbackend.dto.EmployeeDocumentDTO;
 import com.example.storemanagementbackend.model.EmployeeDocument;
 import com.example.storemanagementbackend.repository.EmployeeDocumentRepository;
@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
- 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,15 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
- 
+
 @RestController
 @RequestMapping("/api/hr")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class EmployeeDocumentController {
- 
+
     @Autowired
     private FileStorageService fileStorageService;
- 
+
     @Autowired
     private EmployeeDocumentRepository documentRepository;
 
@@ -39,17 +39,16 @@ public class EmployeeDocumentController {
     public ResponseEntity<List<EmployeeDocumentDTO>> getAllDocuments() {
         List<EmployeeDocument> documents = documentRepository.findAll();
         List<EmployeeDocumentDTO> documentDTOs = documents.stream()
-            .map(doc -> new EmployeeDocumentDTO(
-                doc.getId(),
-                doc.getEmployeeId(),
-                doc.getDocumentType(),
-                doc.getFileName(),
-                doc.getOriginalFileName(),
-                doc.getFileDownloadUri(),
-                doc.getFileType(),
-                doc.getSize()
-            ))
-            .collect(Collectors.toList());
+                .map(doc -> new EmployeeDocumentDTO(
+                        doc.getId(),
+                        doc.getEmployeeId(),
+                        doc.getDocumentType(),
+                        doc.getFileName(),
+                        doc.getOriginalFileName(),
+                        doc.getFileDownloadUri(),
+                        doc.getFileType(),
+                        doc.getSize()))
+                .collect(Collectors.toList());
         return new ResponseEntity<>(documentDTOs, HttpStatus.OK);
     }
 
@@ -58,17 +57,16 @@ public class EmployeeDocumentController {
     public ResponseEntity<List<EmployeeDocumentDTO>> getDocumentsByEmployeeId(@PathVariable String employeeId) {
         List<EmployeeDocument> documents = documentRepository.findByEmployeeId(employeeId);
         List<EmployeeDocumentDTO> documentDTOs = documents.stream()
-            .map(doc -> new EmployeeDocumentDTO(
-                doc.getId(),
-                doc.getEmployeeId(),
-                doc.getDocumentType(),
-                doc.getFileName(),
-                doc.getOriginalFileName(),
-                doc.getFileDownloadUri(),
-                doc.getFileType(),
-                doc.getSize()
-            ))
-            .collect(Collectors.toList());
+                .map(doc -> new EmployeeDocumentDTO(
+                        doc.getId(),
+                        doc.getEmployeeId(),
+                        doc.getDocumentType(),
+                        doc.getFileName(),
+                        doc.getOriginalFileName(),
+                        doc.getFileDownloadUri(),
+                        doc.getFileType(),
+                        doc.getSize()))
+                .collect(Collectors.toList());
         return new ResponseEntity<>(documentDTOs, HttpStatus.OK);
     }
 
@@ -77,17 +75,16 @@ public class EmployeeDocumentController {
     public ResponseEntity<List<EmployeeDocumentDTO>> getDocumentsByType(@PathVariable String documentType) {
         List<EmployeeDocument> documents = documentRepository.findByDocumentType(documentType.toUpperCase());
         List<EmployeeDocumentDTO> documentDTOs = documents.stream()
-            .map(doc -> new EmployeeDocumentDTO(
-                doc.getId(),
-                doc.getEmployeeId(),
-                doc.getDocumentType(),
-                doc.getFileName(),
-                doc.getOriginalFileName(),
-                doc.getFileDownloadUri(),
-                doc.getFileType(),
-                doc.getSize()
-            ))
-            .collect(Collectors.toList());
+                .map(doc -> new EmployeeDocumentDTO(
+                        doc.getId(),
+                        doc.getEmployeeId(),
+                        doc.getDocumentType(),
+                        doc.getFileName(),
+                        doc.getOriginalFileName(),
+                        doc.getFileDownloadUri(),
+                        doc.getFileType(),
+                        doc.getSize()))
+                .collect(Collectors.toList());
         return new ResponseEntity<>(documentDTOs, HttpStatus.OK);
     }
 
@@ -98,21 +95,20 @@ public class EmployeeDocumentController {
         if (document.isPresent()) {
             EmployeeDocument doc = document.get();
             EmployeeDocumentDTO dto = new EmployeeDocumentDTO(
-                doc.getId(),
-                doc.getEmployeeId(),
-                doc.getDocumentType(),
-                doc.getFileName(),
-                doc.getOriginalFileName(),
-                doc.getFileDownloadUri(),
-                doc.getFileType(),
-                doc.getSize()
-            );
+                    doc.getId(),
+                    doc.getEmployeeId(),
+                    doc.getDocumentType(),
+                    doc.getFileName(),
+                    doc.getOriginalFileName(),
+                    doc.getFileDownloadUri(),
+                    doc.getFileType(),
+                    doc.getSize());
             return new ResponseEntity<>(dto, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
- 
-    @RequestMapping(value = "/upload/{docType}/{employeeId}", method = {RequestMethod.POST, RequestMethod.PUT})
+
+    @RequestMapping(value = "/upload/{docType}/{employeeId}", method = { RequestMethod.POST, RequestMethod.PUT })
     public ResponseEntity<EmployeeDocumentDTO> uploadOrUpdateDocument(
             @PathVariable String docType,
             @PathVariable String employeeId,
@@ -126,7 +122,8 @@ public class EmployeeDocumentController {
                 .toUriString();
 
         // Check if document exists for this employee and docType
-        List<EmployeeDocument> docs = documentRepository.findByEmployeeIdAndDocumentType(employeeId, docType.toUpperCase());
+        List<EmployeeDocument> docs = documentRepository.findByEmployeeIdAndDocumentType(employeeId,
+                docType.toUpperCase());
         EmployeeDocument document;
         if (!docs.isEmpty()) {
             // Update existing document
@@ -158,26 +155,25 @@ public class EmployeeDocumentController {
                 document.getOriginalFileName(),
                 document.getFileDownloadUri(),
                 document.getFileType(),
-                document.getSize()
-        );
+                document.getSize());
 
         return ResponseEntity.ok(dto);
     }
- 
+
     @GetMapping("/download/{fileName:.+}")
     public ResponseEntity<Resource> downloadDocument(
             @PathVariable String fileName,
             HttpServletRequest request) {
- 
+
         Resource resource = fileStorageService.loadFileAsResource(fileName);
- 
+
         String contentType = null;
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
         } catch (IOException ex) {
             contentType = "application/octet-stream";
         }
- 
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
@@ -188,11 +184,11 @@ public class EmployeeDocumentController {
     public ResponseEntity<Resource> viewDocument(
             @PathVariable String fileName,
             HttpServletRequest request) {
- 
+
         Resource resource = fileStorageService.loadFileAsResource(fileName);
- 
+
         String contentType = getContentType(fileName);
- 
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
@@ -214,7 +210,8 @@ public class EmployeeDocumentController {
             @PathVariable String employeeId,
             @PathVariable String fileType,
             HttpServletRequest request) {
-        List<EmployeeDocument> docs = documentRepository.findByEmployeeIdAndDocumentType(employeeId, fileType.toUpperCase());
+        List<EmployeeDocument> docs = documentRepository.findByEmployeeIdAndDocumentType(employeeId,
+                fileType.toUpperCase());
         if (docs.isEmpty()) {
             System.out.println("No document found for employeeId: " + employeeId + ", fileType: " + fileType);
             return ResponseEntity.notFound().build();
@@ -248,7 +245,8 @@ public class EmployeeDocumentController {
             @PathVariable String employeeId,
             @PathVariable String fileType,
             HttpServletRequest request) {
-        List<EmployeeDocument> docs = documentRepository.findByEmployeeIdAndDocumentType(employeeId, fileType.toUpperCase());
+        List<EmployeeDocument> docs = documentRepository.findByEmployeeIdAndDocumentType(employeeId,
+                fileType.toUpperCase());
         if (docs.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -272,19 +270,27 @@ public class EmployeeDocumentController {
     private String getContentType(String filename) {
         String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
         switch (extension) {
-            case "pdf": return "application/pdf";
-            case "doc": return "application/msword";
-            case "docx": return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "txt": return "text/plain";
+            case "pdf":
+                return "application/pdf";
+            case "doc":
+                return "application/msword";
+            case "docx":
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "txt":
+                return "text/plain";
             case "jpg":
-            case "jpeg": return "image/jpeg";
-            case "png": return "image/png";
-            default: return "application/octet-stream";
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            default:
+                return "application/octet-stream";
         }
     }
 
     @PutMapping("/documents/{id}")
-    public ResponseEntity<EmployeeDocumentDTO> updateDocument(@PathVariable Long id, @RequestBody EmployeeDocumentDTO dto) {
+    public ResponseEntity<EmployeeDocumentDTO> updateDocument(@PathVariable Long id,
+            @RequestBody EmployeeDocumentDTO dto) {
         Optional<EmployeeDocument> optionalDoc = documentRepository.findById(id);
         if (optionalDoc.isPresent()) {
             EmployeeDocument doc = optionalDoc.get();
@@ -297,15 +303,14 @@ public class EmployeeDocumentController {
             doc.setSize(dto.getSize());
             documentRepository.save(doc);
             EmployeeDocumentDTO updatedDto = new EmployeeDocumentDTO(
-                doc.getId(),
-                doc.getEmployeeId(),
-                doc.getDocumentType(),
-                doc.getFileName(),
-                doc.getOriginalFileName(),
-                doc.getFileDownloadUri(),
-                doc.getFileType(),
-                doc.getSize()
-            );
+                    doc.getId(),
+                    doc.getEmployeeId(),
+                    doc.getDocumentType(),
+                    doc.getFileName(),
+                    doc.getOriginalFileName(),
+                    doc.getFileDownloadUri(),
+                    doc.getFileType(),
+                    doc.getSize());
             return ResponseEntity.ok(updatedDto);
         }
         return ResponseEntity.notFound().build();
@@ -315,7 +320,7 @@ public class EmployeeDocumentController {
     public ResponseEntity<String> uploadEmployeePhoto(
             @PathVariable String employeeId,
             @RequestParam("file") MultipartFile file) {
-        
+
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("File is empty");
         }
@@ -359,7 +364,7 @@ public class EmployeeDocumentController {
         return ResponseEntity.ok("PROFILE document created for " + employeeId);
     }
 
-    @RequestMapping(value = "/upload-multi/{docType}/{employeeId}", method = {RequestMethod.POST, RequestMethod.PUT})
+    @RequestMapping(value = "/upload-multi/{docType}/{employeeId}", method = { RequestMethod.POST, RequestMethod.PUT })
     public ResponseEntity<List<EmployeeDocumentDTO>> uploadMultipleDocuments(
             @PathVariable String docType,
             @PathVariable String employeeId,
@@ -394,13 +399,10 @@ public class EmployeeDocumentController {
                     document.getOriginalFileName(),
                     document.getFileDownloadUri(),
                     document.getFileType(),
-                    document.getSize()
-            );
+                    document.getSize());
             dtos.add(dto);
         }
 
         return ResponseEntity.ok(dtos);
     }
 }
- 
- 

@@ -1,27 +1,27 @@
 // PerformanceController.java
 package com.example.storemanagementbackend.controller;
- 
+
 import com.example.storemanagementbackend.model.Performance;
 import com.example.storemanagementbackend.service.PerformanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
- 
+
 import java.util.List;
- 
+
 /**
  * REST controller for managing Performance records.
  * Provides endpoints for CRUD operations on Performance entities.
  */
 @RestController
 @RequestMapping("/api/performance")
-@CrossOrigin(origins = "https://idmstiranga.online") // Allows frontend to access this API
+@CrossOrigin(origins = "https://hr-management-f.vercel.app") // Allows frontend to access this API
 public class PerformanceController {
- 
+
     @Autowired
     private PerformanceService performanceService;
- 
+
     /**
      * Retrieves all performance records.
      *
@@ -32,7 +32,7 @@ public class PerformanceController {
         List<Performance> performances = performanceService.getAllPerformances();
         return ResponseEntity.ok(performances);
     }
- 
+
     /**
      * Retrieves a performance record by its ID.
      *
@@ -45,7 +45,7 @@ public class PerformanceController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
- 
+
     /**
      * Creates a new performance record.
      *
@@ -57,7 +57,7 @@ public class PerformanceController {
         Performance createdPerformance = performanceService.createPerformance(performance);
         return new ResponseEntity<>(createdPerformance, HttpStatus.CREATED);
     }
- 
+
     /**
      * Updates an existing performance record.
      *
@@ -79,7 +79,7 @@ public class PerformanceController {
             return ResponseEntity.notFound().build();
         }
     }
- 
+
     /**
      * Deletes a performance record by its ID.
      *
@@ -99,4 +99,3 @@ public class PerformanceController {
         }
     }
 }
- 

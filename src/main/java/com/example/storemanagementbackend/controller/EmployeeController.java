@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employees")
-@CrossOrigin(origins = { "http://31.97.205.86:3000", "https://idmstiranga.online" })
+@CrossOrigin(origins = { "http://31.97.205.86:3000", "https://hr-management-f.vercel.app" })
 public class EmployeeController {
 
     private final EmployeeService employeeService;

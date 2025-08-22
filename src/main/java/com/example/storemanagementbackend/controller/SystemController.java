@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/assets/systems")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class SystemController {
     @Autowired
     private SystemService service;
@@ -50,4 +50,4 @@ public class SystemController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

@@ -1,5 +1,5 @@
 package com.example.storemanagementbackend.controller;
- 
+
 import com.example.storemanagementbackend.model.Report;
 import com.example.storemanagementbackend.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.util.UUID;
 import java.util.ArrayList;
- 
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -26,24 +26,24 @@ import com.example.storemanagementbackend.dto.ReportWithEmployeeDTO;
 import com.example.storemanagementbackend.model.Employee;
 import com.example.storemanagementbackend.repository.EmployeeRepository;
 import java.util.stream.Collectors;
- 
+
 @RestController
 @RequestMapping("/api/reports") // Base URL for all report-related endpoints
-@CrossOrigin(origins = "https://idmstiranga.online") // Allow requests from your Next.js frontend
+@CrossOrigin(origins = "https://hr-management-f.vercel.app") // Allow requests from your Next.js frontend
 public class ReportController {
- 
+
     @Autowired
     private ReportService reportService;
- 
+
     @Autowired
     private EmployeeRepository employeeRepository;
- 
+
     // GET all reports or filter by type/subtype
     @GetMapping
     public ResponseEntity<List<ReportWithEmployeeDTO>> getAllReports(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String subtype) {
- 
+
         List<Report> reports;
         if (type != null && !type.equalsIgnoreCase("all")) {
             if (type.equalsIgnoreCase("employee") && subtype != null && !subtype.equalsIgnoreCase("all")) {
@@ -71,7 +71,8 @@ public class ReportController {
             dto.setRemarks(report.getRemarks());
             dto.setProductOrRequirements(report.getProductOrRequirements());
             dto.setCompany(report.getCompany());
-            // Always set the division from the report (for customer reports, this is the dropdown value)
+            // Always set the division from the report (for customer reports, this is the
+            // dropdown value)
             dto.setDivision(report.getDivision());
             // Map new OEM/order/competitor fields
             dto.setSlNo(report.getSlNo());
@@ -113,7 +114,7 @@ public class ReportController {
         }).collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }
- 
+
     // GET a report by ID
     @GetMapping("/{id}")
     public ResponseEntity<Report> getReportById(@PathVariable Long id) {
@@ -121,7 +122,7 @@ public class ReportController {
         return report.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-   
+
     // GET reports by employee ID
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<ReportWithEmployeeDTO>> getReportsByEmployeeId(@PathVariable String employeeId) {
@@ -143,7 +144,8 @@ public class ReportController {
             dto.setRemarks(report.getRemarks());
             dto.setProductOrRequirements(report.getProductOrRequirements());
             dto.setCompany(report.getCompany());
-            // Always set the division from the report (for customer reports, this is the dropdown value)
+            // Always set the division from the report (for customer reports, this is the
+            // dropdown value)
             dto.setDivision(report.getDivision());
             // Map new OEM/order/competitor fields
             dto.setSlNo(report.getSlNo());
@@ -185,29 +187,29 @@ public class ReportController {
         }).collect(Collectors.toList());
         return ResponseEntity.ok(result);
     }
- 
+
     // GET all unique divisions for customer reports
     @GetMapping("/customer-divisions")
     public ResponseEntity<List<String>> getCustomerDivisions() {
         List<String> divisions = reportService.getReportsByType("customer").stream()
-            .map(Report::getDivision)
-            .filter(div -> div != null && !div.trim().isEmpty())
-            .distinct()
-            .collect(Collectors.toList());
+                .map(Report::getDivision)
+                .filter(div -> div != null && !div.trim().isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
         return ResponseEntity.ok(divisions);
     }
- 
+
     // GET all unique companies for customer reports
     @GetMapping("/customer-companies")
     public ResponseEntity<List<String>> getCustomerCompanies() {
         List<String> companies = reportService.getReportsByType("customer").stream()
-            .map(Report::getCompany)
-            .filter(company -> company != null && !company.trim().isEmpty())
-            .distinct()
-            .collect(Collectors.toList());
+                .map(Report::getCompany)
+                .filter(company -> company != null && !company.trim().isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
         return ResponseEntity.ok(companies);
     }
- 
+
     // CREATE a new report (JSON endpoint)
     @PostMapping
     public ResponseEntity<Report> createReport(@RequestBody Report report) {
@@ -220,7 +222,7 @@ public class ReportController {
         Report createdReport = reportService.createReport(report);
         return new ResponseEntity<>(createdReport, HttpStatus.CREATED);
     }
-    
+
     // CREATE a new report with file upload
     @PostMapping(value = "/with-files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Report> createReportWithFiles(
@@ -229,7 +231,7 @@ public class ReportController {
             @RequestParam("content") String content,
             @RequestParam("submittedBy") String submittedBy,
             @RequestParam(value = "attachments", required = false) List<String> attachments) {
-        
+
         Report report = new Report();
         report.setType(type);
         report.setTitle(title);
@@ -238,11 +240,11 @@ public class ReportController {
         report.setDate(LocalDate.now());
         report.setStatus("submitted");
         report.setAttachments(attachments);
-        
+
         Report createdReport = reportService.createReport(report);
         return new ResponseEntity<>(createdReport, HttpStatus.CREATED);
     }
- 
+
     // UPDATE an existing report
     @PutMapping("/{id}")
     public ResponseEntity<Report> updateReport(@PathVariable Long id, @RequestBody Report reportDetails) {
@@ -253,7 +255,7 @@ public class ReportController {
             return ResponseEntity.notFound().build();
         }
     }
- 
+
     // DELETE a report
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReport(@PathVariable Long id) {
@@ -265,27 +267,28 @@ public class ReportController {
             return ResponseEntity.notFound().build();
         }
     }
- 
+
     // VIEW uploaded document
     @GetMapping("/{id}/view")
     public ResponseEntity<Resource> viewReport(@PathVariable Long id) {
         try {
             Optional<Report> reportOpt = reportService.getReportById(id);
-            if (!reportOpt.isPresent() || reportOpt.get().getAttachments() == null || reportOpt.get().getAttachments().isEmpty()) {
+            if (!reportOpt.isPresent() || reportOpt.get().getAttachments() == null
+                    || reportOpt.get().getAttachments().isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-           
+
             String fileName = reportOpt.get().getAttachments().get(0);
             Path filePath = Paths.get("uploads", fileName);
             File file = filePath.toFile();
-           
+
             if (!file.exists()) {
                 return ResponseEntity.notFound().build();
             }
-           
+
             Resource resource = new FileSystemResource(file);
             String contentType = getContentType(fileName);
-           
+
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
@@ -294,27 +297,28 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
- 
+
     // DOWNLOAD uploaded document
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> downloadReport(@PathVariable Long id) {
         try {
             Optional<Report> reportOpt = reportService.getReportById(id);
-            if (!reportOpt.isPresent() || reportOpt.get().getAttachments() == null || reportOpt.get().getAttachments().isEmpty()) {
+            if (!reportOpt.isPresent() || reportOpt.get().getAttachments() == null
+                    || reportOpt.get().getAttachments().isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-           
+
             String fileName = reportOpt.get().getAttachments().get(0);
             Path filePath = Paths.get("uploads", fileName);
             File file = filePath.toFile();
-           
+
             if (!file.exists()) {
                 return ResponseEntity.notFound().build();
             }
-           
+
             Resource resource = new FileSystemResource(file);
             String contentType = getContentType(fileName);
-           
+
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -323,7 +327,7 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
- 
+
     // Simple file upload endpoint
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFiles(@RequestParam("files") MultipartFile[] files) {
@@ -333,20 +337,20 @@ public class ReportController {
             if (!uploadDirFile.exists()) {
                 uploadDirFile.mkdirs();
             }
-            
+
             List<String> uploadedFiles = new ArrayList<>();
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
                     String originalFilename = file.getOriginalFilename();
                     String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
                     String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
-                    
+
                     Path filePath = Paths.get(uploadDir, uniqueFilename);
                     Files.copy(file.getInputStream(), filePath);
                     uploadedFiles.add(uniqueFilename);
                 }
             }
-            
+
             return ResponseEntity.ok("Files uploaded successfully: " + uploadedFiles);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed: " + e.getMessage());
@@ -356,16 +360,23 @@ public class ReportController {
     private String getContentType(String fileName) {
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         switch (extension) {
-            case "pdf": return "application/pdf";
-            case "doc": return "application/msword";
-            case "docx": return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "xls": return "application/vnd.ms-excel";
-            case "xlsx": return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            case "jpg": case "jpeg": return "image/jpeg";
-            case "png": return "image/png";
-            default: return "application/octet-stream";
+            case "pdf":
+                return "application/pdf";
+            case "doc":
+                return "application/msword";
+            case "docx":
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xls":
+                return "application/vnd.ms-excel";
+            case "xlsx":
+                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            default:
+                return "application/octet-stream";
         }
     }
 }
- 
- 

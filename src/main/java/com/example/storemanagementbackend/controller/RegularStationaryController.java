@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/stationary/regular")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class RegularStationaryController {
     @Autowired
     private RegularStationaryService service;
@@ -50,4 +50,4 @@ public class RegularStationaryController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

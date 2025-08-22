@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/lab/components")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class LabComponentController {
     private final LabComponentService service;
 
@@ -51,4 +51,4 @@ public class LabComponentController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

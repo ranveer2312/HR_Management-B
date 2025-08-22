@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/gst")
-@CrossOrigin(origins = {"https://idmstiranga.online", "http://idmstiranga.online", "http://localhost:3000"})
+@CrossOrigin(origins = { "https://idmstiranga.online", "https://hr-management-f.vercel.app", "http://localhost:3000" })
 public class GstCalculatorController {
 
     private final GstService gstService;
@@ -18,9 +18,8 @@ public class GstCalculatorController {
     }
 
     @PostMapping("/calculate")
-    public ResponseEntity<GstCalculationResponse> calculateGst( @RequestBody GstCalculationRequest request) {
+    public ResponseEntity<GstCalculationResponse> calculateGst(@RequestBody GstCalculationRequest request) {
         GstCalculationResponse response = gstService.calculateGst(request);
         return ResponseEntity.ok(response);
     }
 }
-

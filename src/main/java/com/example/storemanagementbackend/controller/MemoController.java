@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/memos")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class MemoController {
 
     @Autowired
     private MemoService memoService;
-    
+
     @Autowired
     private EmployeeRepository employeeRepository;
 
@@ -77,7 +77,8 @@ public class MemoController {
 
     // PUT - Update an existing memo
     @PutMapping("/{id}")
-    public ResponseEntity<MemoResponseDTO> updateMemo(@PathVariable Long id, @RequestBody MemoRequestDTO memoRequestDTO) {
+    public ResponseEntity<MemoResponseDTO> updateMemo(@PathVariable Long id,
+            @RequestBody MemoRequestDTO memoRequestDTO) {
         try {
             MemoResponseDTO updatedMemo = memoService.updateMemo(id, memoRequestDTO);
             return ResponseEntity.ok(updatedMemo);
@@ -107,7 +108,7 @@ public class MemoController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(departments);
     }
-    
+
     // GET - Get all employees (for dropdown in frontend)
     @GetMapping("/employees")
     public ResponseEntity<List<EmployeeInfoDTO>> getAllEmployees() {
@@ -123,4 +124,4 @@ public class MemoController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(employees);
     }
-} 
+}

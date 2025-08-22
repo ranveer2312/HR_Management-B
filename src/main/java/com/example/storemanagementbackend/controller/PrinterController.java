@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/assets/printers")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class PrinterController {
     @Autowired
     private PrinterService service;
@@ -50,4 +50,4 @@ public class PrinterController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}

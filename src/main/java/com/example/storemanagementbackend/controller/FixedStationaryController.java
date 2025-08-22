@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/store/stationary/fixed")
-@CrossOrigin(origins = "https://idmstiranga.online")
+@CrossOrigin(origins = "https://hr-management-f.vercel.app")
 public class FixedStationaryController {
     @Autowired
     private FixedStationaryService service;
@@ -50,4 +50,4 @@ public class FixedStationaryController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-} 
+}
