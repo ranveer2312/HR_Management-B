@@ -41,7 +41,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://idmstiranga.online",
                 "http://idmstiranga.online",
-                "https://hr-management-f.vercel.app"));
+                "https://hr-management-1ys38fsr1-ranveer2312s-projects.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",

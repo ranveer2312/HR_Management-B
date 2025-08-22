@@ -22,7 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "https://idmstiranga.online",
                         "https://hr-management-f.vercel.app",
-                        "http://localhost:3000")
+                        "https://hr-management-1ys38fsr1-ranveer2312s-projects.vercel.app")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
                 .allowedHeaders("*")
                 .allowCredentials(true)

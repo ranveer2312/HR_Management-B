@@ -23,7 +23,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = { "https://hr-management-f.vercel.app", "http://idmstiranga.online", "http://localhost:3000" })
+@CrossOrigin(origins = { "https://hr-management-f.vercel.app",
+        "https://hr-management-1ys38fsr1-ranveer2312s-projects.vercel.app", "http://localhost:3000" })
 @RequiredArgsConstructor
 public class AuthController {
 
