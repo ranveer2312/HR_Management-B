@@ -1,0 +1,512 @@
+reports.controller
+
+
+package com.example.storemanagementbackend.controller;
+ 
+import com.example.storemanagementbackend.model.Report;
+import com.example.storemanagementbackend.service.ReportService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+ 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import com.example.storemanagementbackend.dto.ReportWithEmployeeDTO;
+import com.example.storemanagementbackend.model.Employee;
+import com.example.storemanagementbackend.repository.EmployeeRepository;
+import java.util.stream.Collectors;
+ 
+@RestController
+@RequestMapping("/api/reports") // Base URL for all report-related endpoints
+@CrossOrigin(origins = "http://localhost:3000") // Allow requests from your Next.js frontend
+public class ReportController {
+ 
+    @Autowired
+    private ReportService reportService;
+ 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+ 
+    // GET all reports or filter by type/subtype
+    @GetMapping
+    public ResponseEntity<List<ReportWithEmployeeDTO>> getAllReports(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String subtype) {
+ 
+        List<Report> reports;
+        if (type != null && !type.equalsIgnoreCase("all")) {
+            if (type.equalsIgnoreCase("employee") && subtype != null && !subtype.equalsIgnoreCase("all")) {
+                reports = reportService.getReportsByTypeAndSubtype(type, subtype);
+            } else {
+                reports = reportService.getReportsByType(type);
+            }
+        } else {
+            reports = reportService.getAllReports();
+        }
+        List<ReportWithEmployeeDTO> result = reports.stream().map(report -> {
+            ReportWithEmployeeDTO dto = new ReportWithEmployeeDTO();
+            dto.setId(report.getId());
+            dto.setType(report.getType());
+            dto.setSubtype(report.getSubtype());
+            dto.setTitle(report.getTitle());
+            dto.setContent(report.getContent());
+            dto.setDate(report.getDate());
+            dto.setStatus(report.getStatus());
+            dto.setSubmittedBy(report.getSubmittedBy());
+            dto.setAttachments(report.getAttachments());
+            // Map customer report fields
+            dto.setCustomerName(report.getCustomerName());
+            dto.setDesignation(report.getDesignation());
+            dto.setLandlineOrMobile(report.getLandlineOrMobile());
+            dto.setEmailId(report.getEmailId());
+            dto.setRemarks(report.getRemarks());
+            dto.setProductOrRequirements(report.getProductOrRequirements());
+            // Always set the division from the report (for customer reports, this is the dropdown value)
+            dto.setDivision(report.getDivision());
+            // Map employee details if type is employee or customer
+            if (report.getSubmittedBy() != null) {
+                Employee emp = employeeRepository.findByEmployeeId(report.getSubmittedBy()).orElse(null);
+                if (emp != null) {
+                    dto.setEmployeeName(emp.getEmployeeName());
+                    dto.setEmployeeId(emp.getEmployeeId());
+                    // Only set division from employee for employee reports
+                    if ("employee".equalsIgnoreCase(report.getType())) {
+                        dto.setDivision(emp.getDepartment());
+                    }
+                } else {
+                    dto.setEmployeeId(report.getSubmittedBy());
+                }
+            }
+            return dto;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+ 
+
+    // GET reports by employee ID
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<ReportWithEmployeeDTO>> getReportsByEmployeeId(@PathVariable String employeeId) {
+        List<Report> reports = reportService.getReportsByEmployeeId(employeeId);
+        List<ReportWithEmployeeDTO> result = reports.stream().map(report -> {
+            ReportWithEmployeeDTO dto = new ReportWithEmployeeDTO();
+            dto.setId(report.getId());
+            dto.setType(report.getType());
+            dto.setSubtype(report.getSubtype());
+            dto.setTitle(report.getTitle());
+            dto.setContent(report.getContent());
+            dto.setDate(report.getDate());
+            dto.setStatus(report.getStatus());
+            dto.setSubmittedBy(report.getSubmittedBy());
+            dto.setAttachments(report.getAttachments());
+            // Map customer report fields
+            dto.setCustomerName(report.getCustomerName());
+            dto.setDesignation(report.getDesignation());
+            dto.setLandlineOrMobile(report.getLandlineOrMobile());
+            dto.setEmailId(report.getEmailId());
+            dto.setRemarks(report.getRemarks());
+            dto.setProductOrRequirements(report.getProductOrRequirements());
+            // Always set the division from the report (for customer reports, this is the dropdown value)
+            dto.setDivision(report.getDivision());
+            // Map employee details if type is employee or customer
+            if (report.getSubmittedBy() != null) {
+                Employee emp = employeeRepository.findByEmployeeId(report.getSubmittedBy()).orElse(null);
+                if (emp != null) {
+                    dto.setEmployeeName(emp.getEmployeeName());
+                    dto.setEmployeeId(emp.getEmployeeId());
+                    // Only set division from employee for employee reports
+                    if ("employee".equalsIgnoreCase(report.getType())) {
+                        dto.setDivision(emp.getDepartment());
+                    }
+                } else {
+                    dto.setEmployeeId(report.getSubmittedBy());
+                }
+            }
+            return dto;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+ 
+    // CREATE a new report
+    @PostMapping
+    public ResponseEntity<Report> createReport(@RequestBody Report report) {
+        // Set current date if not provided in the request body
+        if (report.getDate() == null) {
+            report.setDate(LocalDate.now());
+        }
+        // Set default status if not provided
+        if (report.getStatus() == null || report.getStatus().isEmpty()) {
+            report.setStatus("draft"); // Or 'submitted' depending on your default flow
+        }
+        Report createdReport = reportService.createReport(report);
+        return new ResponseEntity<>(createdReport, HttpStatus.CREATED);
+    }
+ 
+    // UPDATE an existing report
+    @PutMapping("/{id}")
+    public ResponseEntity<Report> updateReport(@PathVariable Long id, @RequestBody Report reportDetails) {
+        try {
+            Report updatedReport = reportService.updateReport(id, reportDetails);
+            return ResponseEntity.ok(updatedReport);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+ 
+    // DELETE a report
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReport(@PathVariable Long id) {
+        try {
+            reportService.deleteReport(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            // Handle case where report might not exist for deletion
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+ 
+
+
+
+
+dto
+
+
+package com.example.storemanagementbackend.dto;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public class ReportWithEmployeeDTO {
+    private Long id;
+    private String type;
+    private String subtype;
+    private String title;
+    private String content;
+    private LocalDate date;
+    private String status;
+    private String submittedBy;
+    private String employeeName;
+    private String employeeId;
+    private String division;
+    private List<String> attachments;
+    private String customerName;
+    private String designation;
+    private String landlineOrMobile;
+    private String emailId;
+    private String remarks;
+    private String productOrRequirements;
+
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    public String getSubtype() { return subtype; }
+    public void setSubtype(String subtype) { this.subtype = subtype; }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public String getSubmittedBy() { return submittedBy; }
+    public void setSubmittedBy(String submittedBy) { this.submittedBy = submittedBy; }
+    public String getEmployeeName() { return employeeName; }
+    public void setEmployeeName(String employeeName) { this.employeeName = employeeName; }
+    public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+    public String getDivision() {
+        return division;
+    }
+    public void setDivision(String division) {
+        this.division = division;
+    }
+    public List<String> getAttachments() { return attachments; }
+    public void setAttachments(List<String> attachments) { this.attachments = attachments; }
+    public String getCustomerName() {
+        return customerName;
+    }
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+    public String getDesignation() {
+        return designation;
+    }
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
+    public String getLandlineOrMobile() {
+        return landlineOrMobile;
+    }
+    public void setLandlineOrMobile(String landlineOrMobile) {
+        this.landlineOrMobile = landlineOrMobile;
+    }
+    public String getEmailId() {
+        return emailId;
+    }
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+    public String getRemarks() {
+        return remarks;
+    }
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+    public String getProductOrRequirements() {
+        return productOrRequirements;
+    }
+    public void setProductOrRequirements(String productOrRequirements) {
+        this.productOrRequirements = productOrRequirements;
+    }
+} 
+
+
+
+
+report.java
+
+
+package com.example.storemanagementbackend.model;
+ 
+import jakarta.persistence.*;
+import java.time.LocalDate; // Use LocalDate for date field
+ 
+@Entity
+@Table(name = "reports") // Defines the table name in the database
+public class Report {
+ 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increments ID
+    private Long id; // Use Long for primary key
+ 
+    @Column(nullable = false) // Ensures the type column cannot be null
+    private String type; // employee, visit, oem, customer, blueprint, projection, achievement
+ 
+    private String subtype; // daily, weekly, monthly, yearly (only for employee reports)
+ 
+    @Column(nullable = false)
+    private String title;
+ 
+    @Column(nullable = false, length = 2000) // Increased length for content
+    private String content;
+ 
+    @Column(nullable = false)
+    private LocalDate date; // Stores only date, no time
+ 
+    @Column(nullable = false)
+    private String status; // draft, submitted, approved
+ 
+    private String submittedBy;
+ 
+    private String approvedBy;
+ 
+    private LocalDate approvedDate;
+ 
+    @ElementCollection // For collections of basic types
+    @CollectionTable(name = "report_attachments", joinColumns = @JoinColumn(name = "report_id"))
+    @Column(name = "attachment_url")
+    private java.util.List<String> attachments; // Stores URLs or filenames of attachments
+ 
+    private String customerName;
+    private String designation;
+    private String landlineOrMobile;
+    private String emailId;
+    private String remarks;
+    private String productOrRequirements;
+    private String division;
+ 
+    // Constructors
+    public Report() {
+    }
+ 
+    public Report(String type, String subtype, String title, String content, LocalDate date, String status,
+            String submittedBy) {
+        this.type = type;
+        this.subtype = subtype;
+        this.title = title;
+        this.content = content;
+        this.date = date;
+        this.status = status;
+        this.submittedBy = submittedBy;
+    }
+ 
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+ 
+    public void setId(Long id) {
+        this.id = id;
+    }
+ 
+    public String getType() {
+        return type;
+    }
+ 
+    public void setType(String type) {
+        this.type = type;
+    }
+ 
+    public String getSubtype() {
+        return subtype;
+    }
+ 
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
+    }
+ 
+    public String getTitle() {
+        return title;
+    }
+ 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+ 
+    public String getContent() {
+        return content;
+    }
+ 
+    public void setContent(String content) {
+        this.content = content;
+    }
+ 
+    public LocalDate getDate() {
+        return date;
+    }
+ 
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+ 
+    public String getStatus() {
+        return status;
+    }
+ 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+ 
+    public String getSubmittedBy() {
+        return submittedBy;
+    }
+ 
+    public void setSubmittedBy(String submittedBy) {
+        this.submittedBy = submittedBy;
+    }
+ 
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+ 
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+ 
+    public LocalDate getApprovedDate() {
+        return approvedDate;
+    }
+ 
+    public void setApprovedDate(LocalDate approvedDate) {
+        this.approvedDate = approvedDate;
+    }
+ 
+    public java.util.List<String> getAttachments() {
+        return attachments;
+    }
+ 
+    public void setAttachments(java.util.List<String> attachments) {
+        this.attachments = attachments;
+    }
+ 
+    public String getCustomerName() {
+        return customerName;
+    }
+ 
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+ 
+    public String getDesignation() {
+        return designation;
+    }
+ 
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
+ 
+    public String getLandlineOrMobile() {
+        return landlineOrMobile;
+    }
+ 
+    public void setLandlineOrMobile(String landlineOrMobile) {
+        this.landlineOrMobile = landlineOrMobile;
+    }
+ 
+    public String getEmailId() {
+        return emailId;
+    }
+ 
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+ 
+    public String getRemarks() {
+        return remarks;
+    }
+ 
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+ 
+    public String getProductOrRequirements() {
+        return productOrRequirements;
+    }
+ 
+    public void setProductOrRequirements(String productOrRequirements) {
+        this.productOrRequirements = productOrRequirements;
+    }
+ 
+    public String getDivision() {
+        return division;
+    }
+ 
+    public void setDivision(String division) {
+        this.division = division;
+    }
+ 
+    @Override
+    public String toString() {
+        return "Report{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", subtype='" + subtype + '\'' +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", date=" + date +
+                ", status='" + status + '\'' +
+                ", submittedBy='" + submittedBy + '\'' +
+                ", approvedBy='" + approvedBy + '\'' +
+                ", approvedDate=" + approvedDate +
+                ", attachments=" + attachments +
+                ", customerName='" + customerName + '\'' +
+                ", designation='" + designation + '\'' +
+                ", landlineOrMobile='" + landlineOrMobile + '\'' +
+                ", emailId='" + emailId + '\'' +
+                ", remarks='" + remarks + '\'' +
+                ", productOrRequirements='" + productOrRequirements + '\'' +
+                ", division='" + division + '\'' +
+                '}';
+    }
+}
+ 
+
+
+
+
